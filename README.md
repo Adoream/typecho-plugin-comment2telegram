@@ -1,8 +1,8 @@
-# Comment2Typecho
+# Comment2Telegram
 将  `Typecho` 的评论推送至 `Telegram` 通知，支持回复评论、通过评论、垃圾评论和删除评论
 
 ## 使用
-1. 下载后请将插件目录名请修改为 `Comment2Typecho`
+1. 下载后请将插件目录名请修改为 `Comment2Telegram`
 2. 上次至服务器，启用插件
 3. 然后填写 Telegram Bot Token 和 Telegram ID（可通过 Start `@NekoMoe_Bot`，发送 `/Info` 获得
 4. Enjoy ~
