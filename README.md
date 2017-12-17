@@ -4,8 +4,10 @@
 ## 使用
 1. 下载后请将插件目录名请修改为 `Comment2Telegram`
 2. 上次至服务器，启用插件
-3. 然后填写 Telegram Bot Token 和 Telegram ID（可通过 Start `@NekoMoe_Bot`，发送 `/Info` 获得
+3. 然后填写 Telegram Bot Token 和 Telegram ID（Telegram ID 可通过 Start `@NekoMoe_Bot`，发送 `/Info` 获得
 4. Enjoy ~
+
+PS：如果不知道如何获取 `Telegram Bot Token` 的话那么。。。你不适合使用 `Comment2Telegram`
 
 ## 截图
 ![截图](http://forum.typecho.org/download/file.php?id=1294)
