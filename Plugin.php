@@ -18,6 +18,10 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      * @throws Typecho_Plugin_Exception
      */
     public static function activate() {
+        if (false == self::isWritable(dirname(__FILE__))) {
+            throw new Typecho_Plugin_Exception(_t('对不起，插件目录不可写，无法正常使用此功能'));
+        }
+        
         Typecho_Plugin::factory('Widget_Feedback')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
         Typecho_Plugin::factory('Widget_Comments_Edit')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
         Helper::addAction("CommentEdit", "Comment2Telegram_Action");
@@ -50,7 +54,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         $form->addInput($Token->addRule('required', _t('您必须填写一个正确的Token')));
         $MasterID = new Typecho_Widget_Helper_Form_Element_Text('MasterID', NULL, NULL, _t('MasterID'), _t('Telergam Master ID'));
         $form->addInput($MasterID->addRule('required', _t('您必须填写一个正确的 Telegram ID')));
-        echo '<script>window.onload=function(){$("#typecho-option-item-Token-1 li").append(\'<div class="description"><button class="btn primary" id="setWebhook">设置 Bot 回调</button><p class="description">请先保存设置再设置回调</p></div>\');$("button#setWebhook").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input#Token-0-2").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/index.php/action/CommentEdit?do=setWebhook",success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook")}else{$(b).text("失败："+d.msg)}setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000)},dataType:"json"})})};</script>';
+        echo '<script>window.onload=function(){$("#typecho-option-item-Token-1 li").append(\'<div class="description"><button class="btn primary" id="setWebhook">设置 Bot 回调</button><p class="description">请先保存设置再设置回调</p></div>\');$("button#setWebhook").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input#Token-0-2").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook")}else{$(b).text("失败："+d.msg)}setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000)},dataType:"json"})})};</script>';
     }
     
     /**
