@@ -94,4 +94,31 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
                 
         $GLOBALS['telegramModel']->sendMessage(MASTER, $text, NULL, $button);
     }
+
+    /**
+     * 检测 是否可写
+     * @param $file
+     * @return bool
+     */
+    public static function isWritable($file) {
+        if (is_dir($file)) {
+            $dir = $file;
+            if ($fp = @fopen("$dir/check_writable", 'w')) {
+                @fclose($fp);
+                @unlink("$dir/check_writable");
+                $writeable = true;
+            } else {
+                $writeable = false;
+            }
+        } else {
+            if ($fp = @fopen($file, 'a+')) {
+                @fclose($fp);
+                $writeable = true;
+            } else {
+                $writeable = false;
+            }
+        }
+
+        return $writeable;
+    }
 }
