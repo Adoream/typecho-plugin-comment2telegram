@@ -6,7 +6,7 @@ require_once __DIR__ . '/Bootstrap.php';
  * 
  * @package Comment2Telegram
  * @author Momiji.Jin
- * @version 1.1.0
+ * @version 1.1.6
  * @link https://jcl.moe
  */
 class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
@@ -25,6 +25,14 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         Typecho_Plugin::factory('Widget_Feedback')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
         Typecho_Plugin::factory('Widget_Comments_Edit')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
         Helper::addAction("CommentEdit", "Comment2Telegram_Action");
+        
+        Bootstrap::fetch ("https://api.meow.moe/Statistics/Plugin/add", [
+            'name' => $GLOBALS['options']->title,
+            'url' => $GLOBALS['options']->siteUrl,
+            'version' => Plugin_Const::VERSION,
+            'plugin' => 'Comment2Telegram'
+        ]);
+        
         return _t('请配置此插件的 Token 和 Telergam Master ID, 以使您的 Telegram 推送生效');
     }
     
@@ -38,6 +46,11 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      */
     public static function deactivate() {
         Helper::removeAction("CommentEdit");
+        
+        Bootstrap::fetch ("https://api.meow.moe/Statistics/Plugin/delete", [
+            'name' => $GLOBALS['options']->title,
+            'url' => $GLOBALS['options']->siteUrl
+        ]);
     }
     
     /**
@@ -48,6 +61,13 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config (Typecho_Widget_Helper_Form $form) {
+        $lversion = json_decode(Bootstrap::fetch ("https://api.meow.moe/Comment2Telegram.json"))->version;
+    	if ($lversion > Plugin_Const::VERSION){
+    		echo '<p style="font-size:18px;">你正在使用 <a>' . Plugin_Const::VERSION . '</a> 版本的 Comment2Telegram，最新版本为 <a style="color:red;">' . $lversion . '</a><a href="https://github.com/MoeLoli/Comment2Telegram"><button type="submit" class="btn btn-warn" style="margin-left:10px;">前往更新</button></a></p>';
+    	}else {
+    		echo '<p style="font-size:18px;">你正在使用最新版的 Comment2Telegram！</p>';
+    	}
+	
         $Mode = new Typecho_Widget_Helper_Form_Element_Radio('mode', array ('0' => '由插件处理', '1' => '外部处理'), 0, '回复处理。。', '建议选择 "插件处理"。。如果 Bot 还要实现其他功能请选择 "外部处理"');
         $form->addInput($Mode->addRule('enum', _t('必须选择一个模式'), array(0, 1)));
         $Token = new Typecho_Widget_Helper_Form_Element_Text('Token', NULL, NULL, _t('Token'), _t('需要输入指定Token'));

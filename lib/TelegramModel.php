@@ -3,9 +3,9 @@
         private $ret;
         private static $inlineResults = array ();
         
-        public function __construct ($token = NULL) {
+        public function __construct ($token = NULL, $master = NULL) {
             $this->token = $token;
-            // parent::__construct ();
+            $this->master = $master;
         }
         private function fetch ($url, $postdata = null) {
             $ch = curl_init ();
@@ -27,6 +27,11 @@
             } else {
                 $url = 'https://api.telegram.org/bot' . $this->token . '/' . $method;
             }
+            if ($this->master === NULL) {
+                $maser = MASTER;
+            } else {
+                $maser = $this->master;
+            }
             
             /** 访问网页 */
             $ret = json_decode ($this->fetch ($url, $param), true);
@@ -36,7 +41,7 @@
                 if ($ret['error_code'] != 400 && $ret['error_code'] != 403) {
                     $url = 'https://api.telegram.org/bot' . TOKEN . '/sendMessage';
                     $postdata = [
-                        'chat_id' => MASTER,
+                        'chat_id' => $maser,
                         'text' => $text
                     ];
                     
@@ -194,7 +199,12 @@
             return $ret;
         }
         public function getMaster () {
-            return MASTER;
+            if ($this->master === NULL) {
+                $maser = MASTER;
+            } else {
+                $maser = $this->master;
+            }
+            return $maser;
         }
         public function getReturn () {
             return $this->ret;

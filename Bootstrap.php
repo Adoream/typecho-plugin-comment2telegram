@@ -1,10 +1,14 @@
 <?php
     define('__COMMENT2TELEGRAM_PLUGIN_ROOT__', __DIR__);
     
-    require_once __COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/Config.php';
-    require_once __COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/TelegramModel.php';
+    require_once __COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/lib/Config.php';
+    require_once __COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/lib/Const.php';
+    require_once __COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/lib/TelegramModel.php';
     
     $GLOBALS['telegramModel'] = new TelegramModel;
+    
+    $GLOBALS['options'] = Helper::options();
+    
     class Bootstrap {
         public static function fetch ($url, $postdata = null) {
             $ch = curl_init ();

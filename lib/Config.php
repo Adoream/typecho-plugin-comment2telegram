@@ -1,4 +1,4 @@
 <?php
     define ('TOKEN', '');
     define ('MASTER', '');
-    define ('Webhook', false);
+    define ('Webhook', 'false');

@@ -20,17 +20,16 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     public function init()
     {
         $this->_db = Typecho_Db::get();
-        $this->_options = Helper::options();
-        $this->_cfg = $this->_options->plugin('Comment2Telegram');
+        $this->_cfg = $GLOBALS['options']->plugin('Comment2Telegram');
         
         if ($this->_cfg->Token != TOKEN || $this->_cfg->MasterID != MASTER || Webhook != true) {
             $this->setWebhook();
             $config = "<?php
     define ('TOKEN', '" . addslashes ($this->_cfg->Token) . "');
     define ('MASTER', '" . addslashes ($this->_cfg->MasterID) . "');
-    define ('Webhook', true);
+    define ('Webhook', 'true');
 ";
-            file_put_contents (__COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/Config.php', $config);
+            file_put_contents (__COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/lib/Config.php', $config);
         }
     }
     
@@ -43,8 +42,8 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         if (!$this->is_https()) {
             exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
         }
-        $newurl = (($this->_options->rewrite) ? $this->_options->siteUrl : $this->_options->siteUrl . 'index.php/') . 'action/CommentEdit?do=CallBack';
-
+        $newurl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=CallBack';
+        
         $ret = $GLOBALS['telegramModel']->setWebhook($newurl);
         
         if ($ret['ok'] == true) {
@@ -185,6 +184,38 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
             );
             
             Typecho_Widget::widget('Widget_Abstract_Comments')->insert ($comment);
+            $ContentInfo = $this->getContentInfo($cid);
+            $CommentInfo = $this->getCommentInfo($parent);
+            if (isset($ContentInfo) && isset($CommentInfo)) {
+                $search  = array(
+                    '{siteTitle}',
+                    '{siteURL}',
+                    '{title}',
+                    '{author_p}',
+                    '{author}',
+                    '{permalink}',
+                    '{text_p}',
+                    '{text}',
+                    '{time}'
+                );
+                $replace = array(
+                    $GLOBALS['options']->title,
+                    $GLOBALS['options']->siteUrl,
+                    $ContentInfo['title'],
+                    $CommentInfo['author'],
+                    $ret['screenName'],
+                    $GLOBALS['options']->siteUrl,
+                    $CommentInfo['text'],
+                    $text,
+                    date('Y/m/d', $CommentInfo['created'])
+                );
+                $msgHtml = str_replace($search, $replace, file_get_contents(__COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/template/guest.html'));
+                Bootstrap::fetch(Plugin_Const::EMAIL_SENT_API, [
+                    'email' => $CommentInfo['mail'],
+                    'title' => '您在 ' . $ContentInfo['title'] . ' 的评论有了回复',
+                    'content' => $msgHtml
+                ]);   
+            }
             if ($this->_cfg->mode == 0) {
                 return array('code' => 0);
             } else {
@@ -320,5 +351,19 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         ->where('name = ?', $name)->limit(1));
 
         return $user;
+    }
+    
+    private function getCommentInfo ($coid)
+    {
+        $comment = $this->_db->fetchRow($this->_db->select()->from('table.comments')->where('coid = ?', $coid)->limit(1));
+        
+        return $comment;
+    }
+    
+    private function getContentInfo ($cid)
+    {
+        $content = $this->_db->fetchRow($this->_db->select()->from('table.contents')->where('cid = ?', $cid)->limit(1));
+        
+        return $content;
     }
 }
