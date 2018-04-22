@@ -22,14 +22,22 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         $this->_db = Typecho_Db::get();
         $this->_cfg = $GLOBALS['options']->plugin('Comment2Telegram');
         
-        if ($this->_cfg->Token != TOKEN || $this->_cfg->MasterID != MASTER || Webhook != true) {
-            $this->setWebhook();
-            $config = "<?php
+        if ($this->_cfg->Token !== TOKEN || $this->_cfg->MasterID !== MASTER) {
+            if ($this->_cfg->mode == 0) {
+                if (Webhook !== true) {
+                    $this->setWebhook();   
+                }
+                $config = "<?php
     define ('TOKEN', '" . addslashes ($this->_cfg->Token) . "');
     define ('MASTER', '" . addslashes ($this->_cfg->MasterID) . "');
-    define ('Webhook', 'true');
-";
-            file_put_contents (__COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/lib/Config.php', $config);
+    define ('Webhook', 'true');";
+            } else {
+                $config = "<?php
+    define ('TOKEN', '" . addslashes ($this->_cfg->Token) . "');
+    define ('MASTER', '" . addslashes ($this->_cfg->MasterID) . "');
+    define ('Webhook', 'false');";   
+            }
+            file_put_contents (__COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/Config.php', $config);
         }
     }
     
@@ -68,7 +76,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         }
         
         $reply_to_message = $data['message']['reply_to_message']['text'];
-        if(isset($reply_to_message) && strpos($reply_to_message, "中说到: ") !== false) {
+        if (isset($reply_to_message) && strpos($reply_to_message, "中说到: ") !== false) {
             preg_match('/(.+?) 在 "(.+?)"\(\#(\d+)\) 中说到: \n> ([\s\S]+?) \(\#(\d+)\)/', $reply_to_message, $match);
             $CommentData = [
                 'cid' => $match[3],
