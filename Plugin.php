@@ -26,12 +26,14 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         Typecho_Plugin::factory('Widget_Comments_Edit')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
         Helper::addAction("CommentEdit", "Comment2Telegram_Action");
         
-        Bootstrap::fetch ("https://api.meow.moe/Statistics/Plugin/add", [
+        /**
+	Bootstrap::fetch ("https://api.meow.moe/Statistics/Plugin/add", [
             'name' => $GLOBALS['options']->title,
             'url' => $GLOBALS['options']->siteUrl,
             'version' => Plugin_Const::VERSION,
             'plugin' => 'Comment2Telegram'
         ]);
+	*/
         
         return _t('请配置此插件的 Token 和 Telergam Master ID, 以使您的 Telegram 推送生效');
     }
@@ -46,11 +48,12 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      */
     public static function deactivate() {
         Helper::removeAction("CommentEdit");
-        
+        /**
         Bootstrap::fetch ("https://api.meow.moe/Statistics/Plugin/delete", [
             'name' => $GLOBALS['options']->title,
             'url' => $GLOBALS['options']->siteUrl
         ]);
+	*/
     }
     
     /**
