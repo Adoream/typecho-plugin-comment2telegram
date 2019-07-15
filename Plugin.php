@@ -5,8 +5,8 @@ require_once __DIR__ . '/Bootstrap.php';
  * Telegram 推送评论通知
  * 
  * @package Comment2Telegram
- * @author Momiji.Jin
- * @version 1.1.6
+ * @author Sora Jin
+ * @version 1.1.7
  * @link https://jcl.moe
  */
 class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
@@ -26,14 +26,12 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         Typecho_Plugin::factory('Widget_Comments_Edit')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
         Helper::addAction("CommentEdit", "Comment2Telegram_Action");
         
-        /**
-	Bootstrap::fetch ("https://api.meow.moe/Statistics/Plugin/add", [
-            'name' => $GLOBALS['options']->title,
-            'url' => $GLOBALS['options']->siteUrl,
-            'version' => Plugin_Const::VERSION,
-            'plugin' => 'Comment2Telegram'
+        Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin", [
+            'siteName' => $GLOBALS['options']->title,
+            'siteUrl' => $GLOBALS['options']->siteUrl,
+            'plugin' => 'Comment2Telegram',
+            'version' => Plugin_Const::VERSION
         ]);
-	*/
         
         return _t('请配置此插件的 Token 和 Telergam Master ID, 以使您的 Telegram 推送生效');
     }
@@ -48,12 +46,6 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      */
     public static function deactivate() {
         Helper::removeAction("CommentEdit");
-        /**
-        Bootstrap::fetch ("https://api.meow.moe/Statistics/Plugin/delete", [
-            'name' => $GLOBALS['options']->title,
-            'url' => $GLOBALS['options']->siteUrl
-        ]);
-	*/
     }
     
     /**
@@ -64,20 +56,13 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config (Typecho_Widget_Helper_Form $form) {
-        $lversion = json_decode(Bootstrap::fetch ("https://api.meow.moe/Comment2Telegram.json"))->version;
-    	if ($lversion > Plugin_Const::VERSION){
-    		echo '<p style="font-size:18px;">你正在使用 <a>' . Plugin_Const::VERSION . '</a> 版本的 Comment2Telegram，最新版本为 <a style="color:red;">' . $lversion . '</a><a href="https://github.com/MoeLoli/Comment2Telegram"><button type="submit" class="btn btn-warn" style="margin-left:10px;">前往更新</button></a></p>';
-    	}else {
-    		echo '<p style="font-size:18px;">你正在使用最新版的 Comment2Telegram！</p>';
-    	}
-	
         $Mode = new Typecho_Widget_Helper_Form_Element_Radio('mode', array ('0' => '由插件处理', '1' => '外部处理'), 0, '回复处理。。', '建议选择 "插件处理"。。如果 Bot 还要实现其他功能请选择 "外部处理"');
         $form->addInput($Mode->addRule('enum', _t('必须选择一个模式'), array(0, 1)));
         $Token = new Typecho_Widget_Helper_Form_Element_Text('Token', NULL, NULL, _t('Token'), _t('需要输入指定Token'));
         $form->addInput($Token->addRule('required', _t('您必须填写一个正确的Token')));
         $MasterID = new Typecho_Widget_Helper_Form_Element_Text('MasterID', NULL, NULL, _t('MasterID'), _t('Telergam Master ID'));
         $form->addInput($MasterID->addRule('required', _t('您必须填写一个正确的 Telegram ID')));
-        echo '<script>window.onload=function(){$("#typecho-option-item-Token-1 li").append(\'<div class="description"><button class="btn primary" id="setWebhook">设置 Bot 回调</button><p class="description">请先保存设置再设置回调</p></div>\');$("button#setWebhook").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input#Token-0-2").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook")}else{$(b).text("失败："+d.msg)}setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000)},dataType:"json"})})};</script>';
+        echo '<style>.typecho-option-submit button[type="submit"]{display:none!important}</style><script>window.onload=function(){$(".typecho-option-submit li").append("<div class=\"description\"><button class=\"btn primary\" id=\"save\">保存设置</button></div>");$("button#save").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input#Token-0-2").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",dataType:"json",success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook")}else{$(b).text("失败："+d.msg)}setTimeout(function(){$(b).text(\'正在保存设置\');$(\'.typecho-option-submit button[type="submit"]\').click()},2000)}})});}</script>';
     }
     
     /**
@@ -99,6 +84,8 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      */
     public static function comment_send($comment, $post) {
         // 初始化变量
+        $_cfg = $GLOBALS['options']->plugin('Comment2Telegram');
+
         $text = $comment->author . ' 在 "' . $comment->title . '"(#' . $comment->cid . ') 中说到: 
 > ' . $comment->text . ' (#' . $comment->coid . ')';
         
@@ -115,7 +102,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
             )
         ));
                 
-        $GLOBALS['telegramModel']->sendMessage(MASTER, $text, NULL, $button);
+        $GLOBALS['telegramModel']->sendMessage($_cfg->MasterID, $text, NULL, $button);
     }
 
     /**
