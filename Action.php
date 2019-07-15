@@ -21,24 +21,6 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     {
         $this->_db = Typecho_Db::get();
         $this->_cfg = $GLOBALS['options']->plugin('Comment2Telegram');
-        
-        if ($this->_cfg->Token !== TOKEN || $this->_cfg->MasterID !== MASTER) {
-            if ($this->_cfg->mode == 0) {
-                if (Webhook !== true) {
-                    $this->setWebhook();   
-                }
-                $config = "<?php
-    define ('TOKEN', '" . addslashes ($this->_cfg->Token) . "');
-    define ('MASTER', '" . addslashes ($this->_cfg->MasterID) . "');
-    define ('Webhook', 'true');";
-            } else {
-                $config = "<?php
-    define ('TOKEN', '" . addslashes ($this->_cfg->Token) . "');
-    define ('MASTER', '" . addslashes ($this->_cfg->MasterID) . "');
-    define ('Webhook', 'false');";   
-            }
-            file_put_contents (__COMMENT2TELEGRAM_PLUGIN_ROOT__ . '/Config.php', $config);
-        }
     }
     
     /**
@@ -85,9 +67,10 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
                 'parent' => $match[5]
             ];
             $ret = $this->CommentAdd($CommentData);
-            
             if ($ret['code'] == 0) {
                 $GLOBALS['telegramModel']->sendMessage ($data['message']['chat']['id'], '回复成功');
+            } else {
+                $GLOBALS['telegramModel']->sendMessage ($data['message']['chat']['id'], $ret['msg']);
             }
         }
         
@@ -192,7 +175,8 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
             );
             
             Typecho_Widget::widget('Widget_Abstract_Comments')->insert ($comment);
-            $ContentInfo = $this->getContentInfo($cid);
+
+            /$ContentInfo = $this->getContentInfo($cid);
             $CommentInfo = $this->getCommentInfo($parent);
             if (isset($ContentInfo) && isset($CommentInfo)) {
                 $search  = array(
@@ -274,7 +258,6 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         }
         
         $ret = $this->mark($coid, $status);
-        file_put_contents('1', $ret);
         if ($ret) {
             if ($this->_cfg->mode == 0) {
                 return array('code' => 0);
