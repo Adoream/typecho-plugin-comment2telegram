@@ -6,7 +6,7 @@ require_once __DIR__ . '/Bootstrap.php';
  * 
  * @package Comment2Telegram
  * @author Sora Jin
- * @version 1.2.1
+ * @version 1.2.2
  * @link https://jcl.moe
  */
 class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
@@ -46,12 +46,10 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      */
     public static function deactivate() {
         Helper::removeAction("CommentEdit");
-        
-        Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin", [
-          'siteName' => $GLOBALS['options']->title,
-          'siteUrl' => $GLOBALS['options']->siteUrl,
-          'plugin' => 'Comment2Telegram',
-        ], 'DELETE');
+
+        $data = Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin?siteName=" . $GLOBALS['options']->title . '&siteUrl=' . $GLOBALS['options']->siteUrl . '&plugin=Comment2Telegram');
+        $data = json_decode ($data, true);
+        Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin/" . $data[0]->pid, 'DELETE');
     }
     
     /**
@@ -62,7 +60,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config (Typecho_Widget_Helper_Form $form) {
-        $lversion = json_decode(Bootstrap::fetch (GITHUB_REPO_API))->tag_name;	
+        $lversion = json_decode(Bootstrap::fetch (Plugin_Const::GITHUB_REPO_API))->tag_name;
     	if ($lversion > Plugin_Const::VERSION){	
     		echo '<p style="font-size:18px;">你正在使用 <a>' . Plugin_Const::VERSION . '</a> 版本的 Comment2Telegram，最新版本为 <a style="color:red;">' . $lversion . '</a><a href="https://github.com/MoeLoli/Comment2Telegram"><button type="submit" class="btn btn-warn" style="margin-left:10px;">前往更新</button></a></p>';	
     	} else {	

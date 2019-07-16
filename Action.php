@@ -138,7 +138,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
                         $text = str_replace('#垃圾评论', '', $text);
                         $GLOBALS['telegramModel']->editMessage ($callback_query['message']['chat']['id'], $data['callback_query']['message']['message_id'], $text, $button);
                     } else {
-                        $this->telegram->sendMessage ($chat['id'], '通过评论失败');
+                       $GLOBALS['telegramModel']->sendMessage ($chat['id'], '通过评论失败');
                     }
                 }
             }
