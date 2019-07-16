@@ -6,7 +6,7 @@ require_once __DIR__ . '/Bootstrap.php';
  * 
  * @package Comment2Telegram
  * @author Sora Jin
- * @version 1.1.7
+ * @version 1.2.0
  * @link https://jcl.moe
  */
 class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
@@ -56,13 +56,19 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config (Typecho_Widget_Helper_Form $form) {
+        $lversion = json_decode(Bootstrap::fetch (GITHUB_REPO_API))->tag_name;	
+    	if ($lversion > Plugin_Const::VERSION){	
+    		echo '<p style="font-size:18px;">你正在使用 <a>' . Plugin_Const::VERSION . '</a> 版本的 Comment2Telegram，最新版本为 <a style="color:red;">' . $lversion . '</a><a href="https://github.com/MoeLoli/Comment2Telegram"><button type="submit" class="btn btn-warn" style="margin-left:10px;">前往更新</button></a></p>';	
+    	} else {	
+    		echo '<p style="font-size:18px;">你正在使用最新版的 Comment2Telegram！</p>';	
+    	}
         $Mode = new Typecho_Widget_Helper_Form_Element_Radio('mode', array ('0' => '由插件处理', '1' => '外部处理'), 0, '回复处理。。', '建议选择 "插件处理"。。如果 Bot 还要实现其他功能请选择 "外部处理"');
         $form->addInput($Mode->addRule('enum', _t('必须选择一个模式'), array(0, 1)));
         $Token = new Typecho_Widget_Helper_Form_Element_Text('Token', NULL, NULL, _t('Token'), _t('需要输入指定Token'));
         $form->addInput($Token->addRule('required', _t('您必须填写一个正确的Token')));
         $MasterID = new Typecho_Widget_Helper_Form_Element_Text('MasterID', NULL, NULL, _t('MasterID'), _t('Telergam Master ID'));
         $form->addInput($MasterID->addRule('required', _t('您必须填写一个正确的 Telegram ID')));
-        echo '<style>.typecho-option-submit button[type="submit"]{display:none!important}</style><script>window.onload=function(){$(".typecho-option-submit li").append("<div class=\"description\"><button class=\"btn primary\" id=\"save\">保存设置</button></div>");$("button#save").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input#Token-0-2").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",dataType:"json",success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook")}else{$(b).text("失败："+d.msg)}setTimeout(function(){$(b).text(\'正在保存设置\');$(\'.typecho-option-submit button[type="submit"]\').click()},2000)}})});}</script>';
+        echo '<style>.typecho-option-submit button[type="submit"]{display:none!important}</style><script>window.onload=function(){$(".typecho-option-submit li").append("<div class=\"description\"><button class=\"btn primary\" id=\"save\">保存设置</button></div>");$("button#save").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input[name=Token]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}if($("input[name=MasterID]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",dataType:"json",data:{token:$("input[name=Token]").val()},success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook");setTimeout(function(){$(b).text(\'正在保存设置\');$(\'.typecho-option-submit button[type="submit"]\').click()},2000)}else{$(b).text("失败："+d.msg)}}})})}</script>';
     }
     
     /**
