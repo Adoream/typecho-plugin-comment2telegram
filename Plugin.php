@@ -6,7 +6,7 @@ require_once __DIR__ . '/Bootstrap.php';
  * 
  * @package Comment2Telegram
  * @author Sora Jin
- * @version 1.2.0
+ * @version 1.2.1
  * @link https://jcl.moe
  */
 class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
@@ -31,7 +31,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
             'siteUrl' => $GLOBALS['options']->siteUrl,
             'plugin' => 'Comment2Telegram',
             'version' => Plugin_Const::VERSION
-        ]);
+        ], 'POST');
         
         return _t('请配置此插件的 Token 和 Telergam Master ID, 以使您的 Telegram 推送生效');
     }
@@ -46,6 +46,12 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      */
     public static function deactivate() {
         Helper::removeAction("CommentEdit");
+        
+        Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin", [
+          'siteName' => $GLOBALS['options']->title,
+          'siteUrl' => $GLOBALS['options']->siteUrl,
+          'plugin' => 'Comment2Telegram',
+        ], 'DELETE');
     }
     
     /**

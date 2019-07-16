@@ -35,7 +35,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         $newurl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=CallBack';
         $ret = json_decode (Bootstrap::fetch ('https://api.telegram.org/bot' . $_POST['token'] . '/setWebhook', [
             'url' => $newurl
-        ]), true);
+        ], 'POST'), true);
 
         if ($ret['ok'] == true) {
             exit (json_encode (array ('code' => 0)));
