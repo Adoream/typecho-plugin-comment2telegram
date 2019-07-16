@@ -4,11 +4,11 @@ require_once __DIR__ . '/Bootstrap.php';
 class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface_Do {
     public function action() {
         $this->init();
+        $this->on($this->request->is('do=setWebhook'))->setWebhook ();
         $this->on($this->request->is('do=CommentAdd'))->CommentAdd ();
         $this->on($this->request->is('do=CommentDel'))->CommentDel ();
         $this->on($this->request->is('do=CommentMark'))->CommentMark ();
         $this->on($this->request->is('do=CallBack'))->CallBack ();
-        $this->on($this->request->is('do=setWebhook'))->setWebhook ();
     }
     
     /**
@@ -33,9 +33,10 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
             exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
         }
         $newurl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=CallBack';
-        
-        $ret = $GLOBALS['telegramModel']->setWebhook($newurl);
-        
+        $ret = json_decode (Bootstrap::fetch ('https://api.telegram.org/bot' . $_POST['token'] . '/setWebhook', [
+            'url' => $newurl
+        ]), true);
+
         if ($ret['ok'] == true) {
             exit (json_encode (array ('code' => 0)));
         } else {
@@ -145,6 +146,9 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     }
     
     public function CommentAdd ($data = NULL) {
+        if (empty($data)) {
+            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+        }
         if ($this->_cfg->mode == 0) {
             $cid = $data['cid'];
             $author = $data['author'];
@@ -176,7 +180,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
             
             Typecho_Widget::widget('Widget_Abstract_Comments')->insert ($comment);
 
-            /$ContentInfo = $this->getContentInfo($cid);
+            $ContentInfo = $this->getContentInfo($cid);
             $CommentInfo = $this->getCommentInfo($parent);
             if (isset($ContentInfo) && isset($CommentInfo)) {
                 $search  = array(
@@ -223,6 +227,9 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     }
     
     public function CommentDel ($data = NULL) {
+        if (empty($data)) {
+            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+        }
         if ($this->_cfg->mode == 0) {
             $coid = $data['coid'];
         } else {
@@ -246,6 +253,9 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     }
     
     public function CommentMark ($data = NULL) {
+        if (empty($data)) {
+            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+        }
         if ($this->_cfg->mode == 0) {
             $coid = $data['coid'];
             $status = $data['status'];
