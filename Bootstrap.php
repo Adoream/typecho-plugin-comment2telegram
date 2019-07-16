@@ -27,15 +27,14 @@
 
                     break;
                 case 'POST':
-                    curl_setopt($handle, CURLOPT_POST, true);
-                    curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postdata));
                     break;
                 case 'PUT':
-                    curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'PUT');
-                    curl_setopt($handle, CURLOPT_POSTFIELDS, $data);
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
                     break;
                 case 'DELETE':
-                    curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
                     break;
             }
             curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
