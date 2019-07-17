@@ -40,18 +40,32 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
      * @access public
      */
     public function setWebhook () {
-        if (!$this->is_https()) {
-            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
-        }
-        $newurl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=CallBack';
-        $ret = json_decode (Bootstrap::fetch ('https://api.telegram.org/bot' . $_POST['token'] . '/setWebhook', [
-            'url' => $newurl
-        ], 'POST'), true);
+        if ($this->_cfg->mode == 1) {
+            $addUrl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=' . $GLOBALS['route']['Add'];
+            $delUrl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=' . $GLOBALS['route']['Del'];
+            $markUrl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=' . $GLOBALS['route']['Mark'];
 
-        if ($ret['ok'] == true) {
+            $text = <<< EOF
+评论添加： {$addUrl}
+评论删除： {$delUrl}
+评论标记： {$markUrl}
+EOF;
+            $GLOBALS['telegramModel']->sendMessage($this->_cfg->MasterID, $text);
             exit (json_encode (array ('code' => 0)));
         } else {
-            exit (json_encode (array ('code' => -1, 'msg' => $ret['description'])));
+            if (!$this->is_https()) {
+                exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+            }
+            $newurl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=CallBack';
+            $ret = json_decode (Bootstrap::fetch ('https://api.telegram.org/bot' . $_POST['token'] . '/setWebhook', [
+                'url' => $newurl
+            ], 'POST'), true);
+    
+            if ($ret['ok'] == true) {
+                exit (json_encode (array ('code' => 0)));
+            } else {
+                exit (json_encode (array ('code' => -1, 'msg' => $ret['description'])));
+            }
         }
     }
     
@@ -158,7 +172,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     
     public function CommentAdd ($data = NULL) {
         if (empty($data)) {
-            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天 (A)')));
         }
         if ($this->_cfg->mode == 0) {
             $cid = $data['cid'];
@@ -239,7 +253,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     
     public function CommentDel ($data = NULL) {
         if (empty($data)) {
-            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天 (D)')));
         }
         if ($this->_cfg->mode == 0) {
             $coid = $data['coid'];
@@ -265,7 +279,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     
     public function CommentMark ($data = NULL) {
         if (empty($data)) {
-            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天 (M)')));
         }
         if ($this->_cfg->mode == 0) {
             $coid = $data['coid'];
