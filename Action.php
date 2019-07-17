@@ -5,10 +5,17 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
     public function action() {
         $this->init();
         $this->on($this->request->is('do=setWebhook'))->setWebhook ();
-        $this->on($this->request->is('do=CommentAdd'))->CommentAdd ();
-        $this->on($this->request->is('do=CommentDel'))->CommentDel ();
-        $this->on($this->request->is('do=CommentMark'))->CommentMark ();
-        $this->on($this->request->is('do=CallBack'))->CallBack ();
+        if ($this->_cfg->mode == 0) {
+            $this->on($this->request->is('do=CallBack'))->CallBack ();
+            $this->on($this->request->is('do=CommentAdd'))->RouteBan ();
+            $this->on($this->request->is('do=CommentDel'))->RouteBan ();
+            $this->on($this->request->is('do=CommentMark'))->RouteBan ();
+        } else {
+            $this->on($this->request->is('do=CallBack'))->RouteBan ();
+            $this->on($this->request->is('do=' . $GLOBALS['route']['Add']))->CommentAdd ();
+            $this->on($this->request->is('do=' . $GLOBALS['route']['Del']))->CommentDel ();
+            $this->on($this->request->is('do=' . $GLOBALS['route']['Mark']))->CommentMark ();
+        }
     }
     
     /**
@@ -23,6 +30,10 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
         $this->_cfg = $GLOBALS['options']->plugin('Comment2Telegram');
     }
     
+    public function RouteBan () {
+        exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+    }
+
     /**
      * 设置 Webhook
      *

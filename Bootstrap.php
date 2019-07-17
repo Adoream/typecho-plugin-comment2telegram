@@ -11,12 +11,20 @@
         $_cfg = Helper::options()->plugin('Comment2Telegram');
         if (isset($_cfg->Token)) {
             $GLOBALS['telegramModel'] = new TelegramModel($_cfg->Token, $_cfg->MasterID);
+            if ($_cfg->mode == 1) {
+                $GLOBALS['route'] = [
+                    'Add' => md5 ($_SERVER['HTTP_HOST'] . $_cfg->Token . $_cfg->MasterID),
+                    'Del' => md5 (md5 ($_SERVER['HTTP_HOST'] . $_cfg->Token . $_cfg->MasterID)),
+                    'Mark' => md5 (md5 (md5 ($_SERVER['HTTP_HOST'] . $_cfg->Token . $_cfg->MasterID)))
+                ];
+            }
         } else {
             $GLOBALS['telegramModel'] = NULL;
         }
     } else {
         $GLOBALS['telegramModel'] = NULL;
     }
+
 
     class Bootstrap {
         public static function fetch ($url, $postdata = null, $method = 'GET') {
@@ -43,5 +51,5 @@
             curl_close ($ch);
             
             return $re;
-        }   
+        }
     }

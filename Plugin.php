@@ -60,6 +60,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      * @return void
      */
     public static function config (Typecho_Widget_Helper_Form $form) {
+
         $lversion = json_decode(Bootstrap::fetch (Plugin_Const::GITHUB_REPO_API))->tag_name;
     	if ($lversion > Plugin_Const::VERSION){	
     		echo '<p style="font-size:18px;">你正在使用 <a>' . Plugin_Const::VERSION . '</a> 版本的 Comment2Telegram，最新版本为 <a style="color:red;">' . $lversion . '</a><a href="https://github.com/MoeLoli/Comment2Telegram"><button type="submit" class="btn btn-warn" style="margin-left:10px;">前往更新</button></a></p>';	
@@ -85,7 +86,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
     public static function personalConfig(Typecho_Widget_Helper_Form $form) {}
 
     /**
-     * Telegram推送
+     * Telegram 推送
      * 
      * @access public
      * @param array $comment 评论结构
