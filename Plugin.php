@@ -6,7 +6,7 @@ require_once __DIR__ . '/Bootstrap.php';
  * 
  * @package Comment2Telegram
  * @author Sora Jin
- * @version 1.3.1
+ * @version 1.3.2
  * @link https://jcl.moe
  */
 class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
@@ -22,8 +22,8 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
             throw new Typecho_Plugin_Exception(_t('对不起，插件目录不可写，无法正常使用此功能'));
         }
         
-        Typecho_Plugin::factory('Widget_Feedback')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
-        Typecho_Plugin::factory('Widget_Comments_Edit')->finishComment = array('Comment2Telegram_Plugin', 'comment_send');
+        Typecho_Plugin::factory('Widget_Feedback')->finishComment = array('Comment2Telegram_Plugin', 'commentSend');
+        Typecho_Plugin::factory('Widget_Comments_Edit')->finishComment = array('Comment2Telegram_Plugin', 'commentSend');
         Helper::addAction("CommentEdit", "Comment2Telegram_Action");
         
         Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin", [
@@ -73,7 +73,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         $form->addInput($Token->addRule('required', _t('您必须填写一个正确的Token')));
         $MasterID = new Typecho_Widget_Helper_Form_Element_Text('MasterID', NULL, NULL, _t('MasterID'), _t('Telergam Master ID'));
         $form->addInput($MasterID->addRule('required', _t('您必须填写一个正确的 Telegram ID')));
-        echo '<style>.typecho-option-submit button[type="submit"]{display:none!important}</style><script>window.onload=function(){$(".typecho-option-submit li").append("<div class=\"description\"><button class=\"btn primary\" id=\"save\">保存设置</button></div>");$("input[name=mode]").on("change",function(){if($(this).val()==1){$(".description").append("<div class=\"outDeal\">保存后将会往你的 TG 中发送接口信息</div>")}else if($(this).val()==0){if($(".outDeal").length>0){$(".outDeal").remove()}}});$("button#save").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input[name=Token]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}if($("input[name=MasterID]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",dataType:"json",data:{mode:$("input[name=mode]").val(),token:$("input[name=Token]").val()},success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook");setTimeout(function(){$(b).text("正在保存设置");$(".typecho-option-submit button[type=\"submit\"]").click()},2000)}else{$(b).text("失败："+d.msg)}}})})}</script>';
+        echo '<style>.typecho-option-submit button[type="submit"]{display:none!important}</style><script>window.onload=function(){$(".typecho-option-submit li").append("<div class=\"description\"><button class=\"btn primary\" id=\"save\">保存设置</button></div>");$("input[name=mode]").change(function(){if($(this).val()==1){$(".description").append("<div class=\"outDeal\">保存后将会往你的 TG 中发送接口信息</div>")}else if($(this).val()==0){if($(".outDeal").length>0){$(".outDeal").remove()}}});$("button#save").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input[name=Token]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}if($("input[name=MasterID]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",dataType:"json",data:{mode:$("input[name=mode]:checked").val(),token:$("input[name=Token]").val(),master:$("input[name=Master]").val()},success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook");setTimeout(function(){$(b).text("正在保存设置");$(".typecho-option-submit button[type=\"submit\"]").click()},2000)}else{$(b).text("失败："+d.msg)}}})})}</script>';
     }
     
     /**
@@ -93,7 +93,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
      * @param Typecho_Widget $post 被评论的文章
      * @return void
      */
-    public static function comment_send($comment, $post) {
+    public static function commentSend($comment, $post) {
         // 初始化变量
         $_cfg = $GLOBALS['options']->plugin('Comment2Telegram');
 

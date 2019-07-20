@@ -11,7 +11,7 @@
         $_cfg = Helper::options()->plugin('Comment2Telegram');
         if (isset($_cfg->Token)) {
             $GLOBALS['telegramModel'] = new TelegramModel($_cfg->Token, $_cfg->MasterID);
-            if ($_cfg->mode == 1) {
+            if ($_cfg->mode == 1 || $_POST['mode'] == 1) {
                 $GLOBALS['route'] = [
                     'Add' => md5 ($_SERVER['HTTP_HOST'] . $_cfg->Token . $_cfg->MasterID),
                     'Del' => md5 (md5 ($_SERVER['HTTP_HOST'] . $_cfg->Token . $_cfg->MasterID)),

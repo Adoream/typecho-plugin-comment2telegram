@@ -1,6 +1,6 @@
 <?php
 class Plugin_Const {
-    const VERSION = '1.3.1';
+    const VERSION = '1.3.2';
     
     const EMAIL_SENT_API = 'https://api.aim.moe/SendEmail';
 

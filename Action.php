@@ -40,7 +40,7 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
      * @access public
      */
     public function setWebhook () {
-        if ($this->_cfg->mode == 1) {
+        if ($_POST['mode'] == 1) {
             $addUrl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=' . $GLOBALS['route']['Add'];
             $delUrl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=' . $GLOBALS['route']['Del'];
             $markUrl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=' . $GLOBALS['route']['Mark'];
@@ -50,12 +50,21 @@ class Comment2Telegram_Action extends Typecho_Widget implements Widget_Interface
 评论删除： {$delUrl}
 评论标记： {$markUrl}
 EOF;
-            $GLOBALS['telegramModel']->sendMessage($this->_cfg->MasterID, $text);
+            $url = 'https://api.telegram.org/bot' . $_POST['token'] . '/sendMessage';
+            $postdata = [
+            'chat_id' => $_POST['master'],
+            'text' => $text
+            ];
+            
+            $ch = curl_init ();
+            curl_setopt ($ch, CURLOPT_URL, $url);
+            curl_setopt ($ch, CURLOPT_POSTFIELDS, $postdata);
+            curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
+            $re = curl_exec ($ch);
+            curl_close ($ch);
             exit (json_encode (array ('code' => 0)));
         } else {
-            if (!$this->is_https()) {
-                exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
-            }
             $newurl = (($GLOBALS['options']->rewrite) ? $GLOBALS['options']->siteUrl : $GLOBALS['options']->siteUrl . 'index.php/') . 'action/CommentEdit?do=CallBack';
             $ret = json_decode (Bootstrap::fetch ('https://api.telegram.org/bot' . $_POST['token'] . '/setWebhook', [
                 'url' => $newurl
@@ -76,11 +85,11 @@ EOF;
      */
     public function CallBack () {
         if ($this->_cfg->mode != 0) {
-            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+            exit (json_encode (array ('code' => -1, 'msg' => '模式')));
         }
         $data = json_decode (file_get_contents ("php://input"), true);
         if (empty($data)) {
-            exit (json_encode (array ('code' => -1, 'msg' => '原地爆炸，螺旋升天')));
+            exit (json_encode (array ('code' => -1, 'msg' => '参数为空')));
         }
         
         $reply_to_message = $data['message']['reply_to_message']['text'];
