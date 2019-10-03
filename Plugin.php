@@ -33,7 +33,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
             'version' => Plugin_Const::VERSION
         ], 'POST');
         
-        return _t('请配置此插件的 Token 和 Telergam Master ID, 以使您的 Telegram 推送生效');
+        return _t('请配置此插件的 Token 和 Telegram Master ID, 以使您的 Telegram 推送生效');
     }
     
     /**
@@ -71,7 +71,7 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         $form->addInput($Mode->addRule('enum', _t('必须选择一个模式'), array(0, 1)));
         $Token = new Typecho_Widget_Helper_Form_Element_Text('Token', NULL, NULL, _t('Token'), _t('需要输入指定Token'));
         $form->addInput($Token->addRule('required', _t('您必须填写一个正确的Token')));
-        $MasterID = new Typecho_Widget_Helper_Form_Element_Text('MasterID', NULL, NULL, _t('MasterID'), _t('Telergam Master ID'));
+        $MasterID = new Typecho_Widget_Helper_Form_Element_Text('MasterID', NULL, NULL, _t('MasterID'), _t('Telegram Master ID'));
         $form->addInput($MasterID->addRule('required', _t('您必须填写一个正确的 Telegram ID')));
         echo '<style>.typecho-option-submit button[type="submit"]{display:none!important}</style><script>window.onload=function(){$(".typecho-option-submit li").append("<div class=\"description\"><button class=\"btn primary\" id=\"save\">保存设置</button></div>");$("input[name=mode]").change(function(){if($(this).val()==1){$(".description").append("<div class=\"outDeal\">保存后将会往你的 TG 中发送接口信息</div>")}else if($(this).val()==0){if($(".outDeal").length>0){$(".outDeal").remove()}}});$("button#save").click(function(){var b=$(this),a=$(b).text();$(b).attr("disabled","disabled");if($("input[name=Token]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}if($("input[name=MasterID]").val()==""){$(b).text("请填写Bot Token");setTimeout(function(){$(b).text(a);$(b).removeAttr("disabled")},2000);return}$.ajax({type:"POST",url:window.location.origin+"/action/CommentEdit?do=setWebhook",dataType:"json",data:{mode:$("input[name=mode]:checked").val(),token:$("input[name=Token]").val(),master:$("input[name=Master]").val()},success:function(d,e,c){if(d.code=="0"){$(b).text("已 Reset Webhook");setTimeout(function(){$(b).text("正在保存设置");$(".typecho-option-submit button[type=\"submit\"]").click()},2000)}else{$(b).text("失败："+d.msg)}}})})}</script>';
     }
