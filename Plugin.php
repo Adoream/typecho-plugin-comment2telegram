@@ -26,12 +26,12 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
         Typecho_Plugin::factory('Widget_Comments_Edit')->finishComment = array('Comment2Telegram_Plugin', 'commentSend');
         Helper::addAction("CommentEdit", "Comment2Telegram_Action");
         
-        Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin", [
+        /*Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin", [
             'siteName' => $GLOBALS['options']->title,
             'siteUrl' => $GLOBALS['options']->siteUrl,
             'plugin' => 'Comment2Telegram',
             'version' => Plugin_Const::VERSION
-        ], 'POST');
+        ], 'POST');*/
         
         return _t('请配置此插件的 Token 和 Telegram Master ID, 以使您的 Telegram 推送生效');
     }
@@ -47,9 +47,9 @@ class Comment2Telegram_Plugin implements Typecho_Plugin_Interface {
     public static function deactivate() {
         Helper::removeAction("CommentEdit");
 
-        $data = Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin?siteName=" . $GLOBALS['options']->title . '&siteUrl=' . $GLOBALS['options']->siteUrl . '&plugin=Comment2Telegram');
+        /*$data = Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin?siteName=" . $GLOBALS['options']->title . '&siteUrl=' . $GLOBALS['options']->siteUrl . '&plugin=Comment2Telegram');
         $data = json_decode ($data, true);
-        Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin/" . $data[0]->pid, 'DELETE');
+        Bootstrap::fetch ("https://api.aim.moe/Counter/Plugin/" . $data[0]->pid, 'DELETE');*/
     }
     
     /**
